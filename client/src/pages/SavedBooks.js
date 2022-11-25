@@ -7,21 +7,23 @@ import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 
 const SavedBooks = () => {
-  const [userData, setUserData] = useState({});
+  const { loading, data } = useQuery(GET_ME);
   let userData = data?.me || []
   const [removeBook, {error}] = useMutation(REMOVE_BOOK);
 
-const handleDeleteBook = async (bookId) => {
-  try {
-    const { data } = await removeBook({
-      variables: { bookId: bookId }
-    })
-    userData = data.removeBook
-    removeBookId(bookId);
-  } catch (err) {
-    console.error(err);
-  }
-};
+
+  // create function that accepts the book's mongo _id value as param and deletes the book from the database
+  const handleDeleteBook = async (bookId) => {
+    try {
+      const { data } = await removeBook({
+        variables: { bookId: bookId }
+      })
+      userData = data.removeBook
+      removeBookId(bookId);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <>
@@ -32,12 +34,12 @@ const handleDeleteBook = async (bookId) => {
       </Jumbotron>
       <Container>
         <h2>
-          {userData.savedBooks.length
+          {userData.savedBooks?.length
             ? `Viewing ${userData.savedBooks.length} saved ${userData.savedBooks.length === 1 ? 'book' : 'books'}:`
             : 'You have no saved books!'}
         </h2>
         <CardColumns>
-          {userData.savedBooks.map((book) => {
+          {userData.savedBooks?.map((book) => {
             return (
               <Card key={book.bookId} border='dark'>
                 {book.image ? <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' /> : null}
